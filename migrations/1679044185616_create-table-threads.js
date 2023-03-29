@@ -21,6 +21,10 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
+    updated_at: {
+      type: 'TEXT',
+      notNull: true,
+    },
   });
 
   pgm.addConstraint('threads', 'fk_threads.users.id', 'FOREIGN KEY(owner) REFERENCES users(id) ON DELETE CASCADE');
