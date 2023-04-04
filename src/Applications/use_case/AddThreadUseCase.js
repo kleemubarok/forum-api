@@ -1,17 +1,15 @@
-const RegisterUser = require('../../Domains/users/entities/RegisterUser');
+const AddThread = require('../../Domains/threads/entities/AddThread');
 
-class AddUserUseCase {
-  constructor({ userRepository, passwordHash }) {
-    this._userRepository = userRepository;
-    this._passwordHash = passwordHash;
+class AddThreadUseCase {
+  constructor({ threadRepository }) {
+    this._threadRepository = threadRepository;
+    // this._passwordHash = passwordHash;
   }
 
   async execute(useCasePayload) {
-    const registerUser = new RegisterUser(useCasePayload);
-    await this._userRepository.verifyAvailableUsername(registerUser.username);
-    registerUser.password = await this._passwordHash.hash(registerUser.password);
-    return this._userRepository.addUser(registerUser);
+    const addThread = new AddThread(useCasePayload);
+    return this._threadRepository.addThread(addThread);
   }
 }
 
-module.exports = AddUserUseCase;
+module.exports = AddThreadUseCase;

@@ -1,8 +1,8 @@
 const InvariantError = require('../../Commons/exceptions/InvariantError');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
-const UserRepository = require('../../Domains/threads/ThreadRepository');
+const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 
-class ThreadRepositoryPostgres extends UserRepository {
+class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
     super();
     this._pool = pool;
@@ -14,6 +14,9 @@ class ThreadRepositoryPostgres extends UserRepository {
     const id = `thread-${this._idGenerator()}`;
     const owner = `user-LvrRC3WZYsG-9wA1DFVWn`; // TODO: Change this
     const createdAt = new Date().toISOString();
+    console.log('touch down');
+
+    console.log(`title: %s, body: %s, id: %s, owner: %s, createdAt: %s`, title, body, id, owner, createdAt);
 
     const query = {
       text: 'INSERT INTO threads VALUES($1, $2, $3, $4, $5, $6) RETURNING id, title, owner',
@@ -21,49 +24,33 @@ class ThreadRepositoryPostgres extends UserRepository {
     };
 
     const result = await this._pool.query(query);
+    console.log(result.rows[0]);
 
     return new AddedThread({ ...result.rows[0] });
   }
 
-  async getThreadById(id) {
-    let query = {
-      text: 'SELECT id, title, body, created_at as date, username FROM threads t inner join users u WHERE t.owner = u.id AND t.id = $1',
-      values: [id],
-    };
+  // async getThreadById(id) {
+  //   let query = {
+  //     text: 'SELECT id, title, body, created_at as date, username FROM threads t inner join users u WHERE t.owner = u.id AND t.id = $1',
+  //     values: [id],
+  //   };
 
-    let result = await this._pool.query(query);
+  //   let result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new InvariantError('thread tidak ditemukan');
-    }
+  //   if (!result.rowCount) {
+  //     throw new InvariantError('thread tidak ditemukan');
+  //   }
 
-    // TODO: beresin ini pisah aja.
-    const threadResult = result.rows[0];
+  //   // TODO: beresin ini pisah aja.
+  //   const threadResult = result.rows[0];
 
-    query.text =
-      'SELECT id, username, created_at as date, content FROM comments c INNER JOIN users u ON u.id=c.owner AND c.thread_id = $1 ORDER BY date DESC';
+  //   query.text =
+  //     'SELECT id, username, created_at as date, content FROM comments c INNER JOIN users u ON u.id=c.owner AND c.thread_id = $1 ORDER BY date DESC';
 
-    const threadComments = await this._pool.query(query);
+  //   const threadComments = await this._pool.query(query);
 
-    return result.rows[0];
-  }
-
-  async getIdByUsername(username) {
-    const query = {
-      text: 'SELECT id FROM users WHERE username = $1',
-      values: [username],
-    };
-
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new InvariantError('user tidak ditemukan');
-    }
-
-    const { id } = result.rows[0];
-
-    return id;
-  }
+  //   return result.rows[0];
+  // }
 }
 
-module.exports = UserRepositoryPostgres;
+module.exports = ThreadRepositoryPostgres;
