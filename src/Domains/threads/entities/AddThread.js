@@ -2,8 +2,9 @@ class AddThread {
   constructor(payload) {
     this._verifyPayload(payload);
 
-    const { title, body } = payload;
+    const { userID, title, body } = payload;
 
+    this.userID = userID;
     this.title = title;
     this.body = body;
   }
