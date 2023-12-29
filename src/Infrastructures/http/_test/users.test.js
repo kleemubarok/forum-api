@@ -29,7 +29,6 @@ describe('/users endpoint', () => {
         url: '/users',
         payload: requestPayload,
       });
-
       // Assert
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(201);
