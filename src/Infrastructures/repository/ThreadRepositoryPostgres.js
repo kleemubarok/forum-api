@@ -1,5 +1,6 @@
-const InvariantError = require('../../Commons/exceptions/InvariantError');
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
+const ThreadDetail = require('../../Domains/threads/entities/ThreadDetail');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
@@ -24,28 +25,31 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     return new AddedThread({ ...result.rows[0] });
   }
 
-  // async getThreadById(id) {
-  //   let query = {
-  //     text: 'SELECT id, title, body, created_at as date, username FROM threads t inner join users u WHERE t.owner = u.id AND t.id = $1',
-  //     values: [id],
-  //   };
+  async validateID(id) {
+    const result = await this._pool.query({
+      text: 'SELECT id FROM threads WHERE id = $1',
+      values: [id],
+    });
 
-  //   let result = await this._pool.query(query);
+    if (!result.rowCount) throw new NotFoundError('thread tidak ditemukan');
 
-  //   if (!result.rowCount) {
-  //     throw new InvariantError('thread tidak ditemukan');
-  //   }
+    return true;
+  }
 
-  //   // TODO: beresin ini pisah aja.
-  //   const threadResult = result.rows[0];
+  async getThreadById(threadId) {
+    const result = await this._pool.query({
+      text: `SELECT t.id, t.title, t.body, t.created_at as date, u.username 
+      FROM threads t
+      INNER JOIN users u 
+      ON u.id = t.owner
+      WHERE t.id = $1`,
+      values: [threadId],
+    });
 
-  //   query.text =
-  //     'SELECT id, username, created_at as date, content FROM comments c INNER JOIN users u ON u.id=c.owner AND c.thread_id = $1 ORDER BY date DESC';
+    if (!result.rowCount) throw new NotFoundError('thread tidak ditemukan');
 
-  //   const threadComments = await this._pool.query(query);
-
-  //   return result.rows[0];
-  // }
+    return new ThreadDetail({ ...result.rows[0] });
+  }
 }
 
 module.exports = ThreadRepositoryPostgres;

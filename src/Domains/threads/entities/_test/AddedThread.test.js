@@ -3,10 +3,7 @@ const AddedThread = require('../AddedThread');
 describe('an AddedThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {
     // Arrange
-    const payload = {
-      title: 'dicoding thread',
-      owner: 'user-DWrT3pXe1hccYkV1eIAxS',
-    };
+    const payload = {};
 
     // Action and Assert
     expect(() => new AddedThread(payload)).toThrowError('ADDED_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
